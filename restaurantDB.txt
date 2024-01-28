@@ -1,0 +1,317 @@
+drop database if exists restaurantDB;
+create database restaurantDB;
+use restaurantDB;
+
+create table customerAccount(
+	emailAddress varchar(100),
+    	firstName varchar(100),
+    	lastName varchar(100),
+    	cellNum char(10),
+    	streetAddress varchar(100),
+    	city varchar(100),
+    	postalCode char(6),
+    	creditAmt decimal(6, 2),
+    	primary key (emailAddress));
+
+create table foodOrder(
+	orderID integer,
+	totalPrice decimal(6,2),
+	tip decimal(6, 2),
+	datePlaced date,
+	primary key (orderID));
+
+create table food (
+	name varchar(100),
+	primary key (name));
+
+create table restaurant(
+	name varchar(100),
+	streetAddress varchar(100),
+	city varchar(100),
+	postalCode char(6),
+	url varchar(200),
+	primary key (name));
+
+create table employee(
+	ID integer,
+	firstName varchar(100),
+	lastName varchar(100),
+	emailAddress varchar(100),
+      restaurantName varchar(100),
+	primary key (ID),
+      foreign key(restaurantName) references restaurant(name));
+
+create table manager(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table serverStaff(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table chef(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table deliveryPerson(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table payment(
+	customerEmail varchar(100),
+	date date not null,
+	paymentAmount decimal(6,2) not null,
+	primary key (customerEmail, date),
+	foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade);
+
+create table shift(
+	empID integer not null,
+	day varchar(15) not null,
+	startTime time not null,
+	endTime time not null,
+	primary key (empID, day),
+	foreign key (empID) references employee(ID) on delete cascade);
+
+create table chefCredentials (
+	empID integer not null,
+	cred varchar(30),
+	primary key (empID, cred),
+	foreign key (empID) references employee(ID) on delete cascade);
+
+create table orderPlacement(
+	customerEmail varchar(100) not null,
+	orderID integer not null,
+	restaurant varchar(100) not null,
+	orderTime time,
+	primary key (customerEmail, orderID, restaurant),
+	foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade,
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (restaurant) references restaurant(name) on delete cascade);
+
+create table relatedTo(
+	customer varchar(100) not null,
+	employee integer not null,
+	relationship varchar(100),
+	primary key (customer, employee),
+	foreign key (customer) references customerAccount(emailAddress) on delete cascade,
+	foreign key (employee) references employee(ID) on delete cascade);
+
+create table menu(
+	restaurant varchar(100) not null,
+	food varchar(100) not null,
+	price decimal(6, 2),
+	primary key (restaurant, food),
+	foreign key (restaurant) references restaurant(name) on delete cascade,
+	foreign key (food) references food (name) on delete cascade);
+
+create table foodItemsinOrder(
+	orderID integer not null,
+	food varchar(100) not null,
+	primary key (orderID, food),
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (food) references food(name) on delete cascade);
+
+create table delivery(
+	orderID integer not null,
+	deliveryPerson integer not null,
+	deliveryTime time,
+	primary key (orderID, deliveryPerson),
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (deliveryPerson) references employee(id) on delete cascade);
+
+create table worksAt(
+	employeeID integer not null,
+	restaurant varchar(100) not null,
+	primary key (employeeID, restaurant),
+	foreign key (employeeID) references employee(ID) on delete cascade,
+	foreign key (restaurant) references restaurant(name) on delete cascade);
+
+create table weekdays(
+	dayOrder integer,
+	day varchar(10),
+	primary key (dayOrder));
+
+insert into customerAccount values
+('bilal@gmail.com','Bilal','Imran','4377654321','Adelaide Street','Kingston','K7L9E6',5.00),
+('brian@gmail.com','Brian','May','6471234568','102 Ab Drive','Vaughan','L4K6X2',6.22),
+('dsouza06@gmail.com','Christian','DSouza','6478231495','655 Princess St','Kingston','K7L0E7',5.00),
+('jack@gmail.com','Jack','Sock','6471234562','106 Ab Drive','Vaughan','L4K6X6',1.22),
+('james@gmail.com','James','Het','6471234567','101 Ab Drive','Vaughan','L4K6X1',5.22),
+('jill@gmail.com','Jill','Goodacre','3453453453','345 Jill Street','Phoenix','J5J5J5',5.00),
+('kay@gmail.com','Kay','Frazier','6471234569','103 Ab Drive','Vaughan','L4K6X3',7.22),
+('matt@gmail.com','Matt','Damon','6471234560','104 Ab Drive','Vaughan','L4K6X4',8.22),
+('miquel@gmail.com','Miquel','DSouza','6473267932','39 Charlton Avenue','Thornhill','L4J6W4',5.00),
+('nick@gmail.com','Nick','Kyrgios','0506782834','25 Hillcrest Park','Melbourne','T8F4F1',5.00),
+('sam@gmail.com','Sam','Smith','6471234561','105 Ab Drive','Vaughan','L4K6X5',9.22);
+
+insert into foodOrder values
+(1,24.99,4.67,'2022-01-01'),
+(2,53.32,16.41,'2022-01-01'),
+(3,33.14,8.72,'2022-01-02'),
+(4,15.88,5.15,'2022-01-02'),
+(5,14.99,2.65,'2022-01-02'),
+(6,450.04,50.28,'2022-01-02');
+
+insert into food values
+('Beef Tongue'),
+('Calzone'),
+('Fried Chicken'),
+('Pineapple Juice'),
+('Pizza'),
+('Prime Rib'),
+('Soup'),
+('Steak'),
+('Sushi'),
+('Sweet Spaghetti'),
+('Tempura'),
+('Tenders');
+
+insert into restaurant values
+('168 Sushi','22 Charlton Avenue','Vaughan','L2J9W2','www.168sushi.ca'),
+('Dim','465 Princess Street','Kingston','L5J6G4','www.dim.ca'),
+('Jolibee','66 Road Avenue','Maple','L1J4P3','www.jolibee.ca'),
+('KFC','11 Maine Street','Thornhill','L4J6X3','www.kfc.ca'),
+('Montana','77 Texas Drive','Toronto','L9J6Q5','www.montana.ca'),
+('PizzaPizza','55 Far Drive','Brampton','L8J2R8','www.pizzapizza.ca');
+
+insert into employee values
+(1,'Christian','DSouza','christian@gmail.com','KFC'),
+(2,'Ryan','Luk','ryan@gmail.com','168 Sushi'),
+(3,'Brandon','Morado','brandon@gmail.com','Dim'),
+(4,'Daniel','Di Giovanni','daniel@gmail.com','PizzaPizza'),
+(5,'Rocco','Ali','rocco@gmail.com','Jolibee'),
+(6,'Chris','Taddeo','chris@gmail.com','Montana'),
+(7,'Jayson','Cabrera','jayson@gmail.com','Jolibee'),
+(8,'Richard','Wang','richard@gmail.com','PizzaPizza'),
+(9,'Benjamin','Tiong','benjamin@gmail.com','168 Sushi'),
+(10,'Nathaniel','Campos','nathaniel@gmail.com','KFC');
+
+insert into manager values
+(1),
+(2),
+(5);
+
+insert into serverStaff values
+(1),
+(8),
+(9);
+
+insert into chef values
+(4),
+(7),
+(10);
+
+insert into deliveryPerson values
+(2),
+(3),
+(6),
+(7),
+(8),
+(10);
+
+insert into payment values
+('brian@gmail.com','2022-01-01',69.73),
+('jack@gmail.com','2022-01-02',500.32),
+('james@gmail.com','2022-01-01',29.66),
+('kay@gmail.com','2022-01-02',41.86),
+('matt@gmail.com','2022-01-02',21.03),
+('sam@gmail.com','2022-01-02',17.64);
+
+insert into shift values
+(1,'Monday','21:00:00','01:00:00'),
+(1,'Tuesday','21:00:00','01:00:00'),
+(1,'Wednesday','21:00:00','01:00:00'),
+(1,'Thursday','21:00:00','01:00:00'),
+(1,'Friday','21:00:00','01:00:00'),
+(2,'Monday','02:00:00','12:00:00'),
+(2,'Tuesday','02:00:00','12:00:00'),
+(2,'Wednesday','02:00:00','12:00:00'),
+(2,'Thursday','02:00:00','12:00:00'),
+(2,'Friday','02:00:00','12:00:00'),
+(2,'Saturday','02:00:00','12:00:00'),
+(3,'Tuesday','08:00:00','16:00:00'),
+(3,'Thursday','08:00:00','16:00:00'),
+(4,'Saturday','08:00:00','16:00:00'),
+(4,'Sunday','08:00:00','16:00:00'),
+(5,'Wednesday','21:00:00','01:00:00'),
+(6,'Friday','21:00:00','01:00:00'),
+(7,'Monday','21:00:00','01:00:00'),
+(8,'Thursday','21:00:00','01:00:00'),
+(9,'Tuesday','21:00:00','01:00:00'),
+(10,'Wednesday','21:00:00','01:00:00');
+
+insert into chefCredentials values
+(4,'Line Cook'),
+(7,'Executive Chef'),
+(10,'Sous Chef');
+
+insert into orderPlacement values
+('brian@gmail.com',2,'Montana','05:00:00'),
+('jack@gmail.com',6,'Jolibee','05:00:00'),
+('james@gmail.com',1,'KFC','05:00:00'),
+('kay@gmail.com',3,'168 Sushi','05:00:00'),
+('matt@gmail.com',4,'PizzaPizza','05:00:00'),
+('sam@gmail.com',5,'Dim','05:00:00');
+
+insert into relatedTo values
+('brian@gmail.com',2,'Enemies'),
+('jack@gmail.com',6,'Spouse'),
+('james@gmail.com',1,'Friends'),
+('kay@gmail.com',3,'Siblings'),
+('matt@gmail.com',4,'Father'),
+('sam@gmail.com',5,'Son');
+
+insert into menu values
+('168 Sushi','Sushi',24.17),
+('168 Sushi','Tempura',8.44),
+('Dim','Soup',15.99),
+('Dim','Beef Tongue',15.99),
+('Jolibee','Pineapple Juice',2.75),
+('Jolibee','Sweet Spaghetti',8.93),
+('KFC','Fried Chicken',14.86),
+('KFC','Tenders',12.56),
+('Montana','Prime Rib',48.95),
+('Montana','Steak',33.45),
+('PizzaPizza','Pizza',3.67),
+('PizzaPizza','Calzone',7.32);
+
+insert into foodItemsinOrder values
+(1,'Fried Chicken'),
+(1,'Tenders'),
+(2,'Sushi'),
+(2,'Tempura'),
+(3,'Beef Tongue'),
+(3,'Soup'),
+(4,'Calzone'),
+(4,'Pizza'),
+(5,'Pineapple Juice'),
+(5,'Sweet Spaghetti'),
+(6,'Steak'),
+(6,'Prime Rib');
+
+insert into delivery values
+(1,3,'12:00:00'),
+(2,2,'15:00:00'),
+(3,10,'18:00:00'),
+(4,8,'13:00:00'),
+(5,7,'16:00:00'),
+(6,6,'19:00:00');
+
+insert into worksAt values
+(1,'KFC'),
+(2,'168 Sushi'),
+(3,'Dim'),
+(4,'PizzaPizza'),
+(5,'Jolibee'),
+(6,'Montana'),
+(7,'Jolibee'),
+(8,'PizzaPizza'),
+(9,'168 Sushi'),
+(10,'KFC');
+
+insert into weekdays values
+(1,'Monday'),
+(2,'Tuesday'),
+(3,'Wednesday'),
+(4,'Thursday'),
+(5,'Friday');
